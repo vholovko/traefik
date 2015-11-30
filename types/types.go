@@ -5,11 +5,26 @@ import (
 	"strings"
 )
 
+// Callback type
+type Callback func() error
+
 // Backend holds backend configuration.
 type Backend struct {
 	Servers        map[string]Server `json:"servers,omitempty"`
 	CircuitBreaker *CircuitBreaker   `json:"circuitBreaker,omitempty"`
 	LoadBalancer   *LoadBalancer     `json:"loadBalancer,omitempty"`
+
+	onDestroy Callback
+}
+
+// OnDestroy is Calles when backend has no longer active connections
+func (backend *Backend) OnDestroy() error {
+	return backend.onDestroy()
+}
+
+// SetOnDestroy sets the callback
+func (backend *Backend) SetOnDestroy(callback Callback) {
+	backend.onDestroy = callback
 }
 
 // LoadBalancer holds load balancing configuration.

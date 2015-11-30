@@ -5,7 +5,6 @@ import (
 	"errors"
 	fmtlog "log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"reflect"
@@ -16,16 +15,18 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/negroni"
+	"github.com/emilevauge/traefik/lb"
 	"github.com/emilevauge/traefik/middlewares"
 	"github.com/emilevauge/traefik/provider"
 	"github.com/emilevauge/traefik/types"
 	"github.com/gorilla/mux"
+	"github.com/kobolog/gorb/core"
 	"github.com/mailgun/manners"
 	"github.com/mailgun/oxy/cbreaker"
 	"github.com/mailgun/oxy/forward"
-	"github.com/mailgun/oxy/roundrobin"
 	"github.com/thoas/stats"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"net"
 	"sync"
 )
 
@@ -35,6 +36,7 @@ var (
 	currentConfigurations = make(configs)
 	metrics               = stats.New()
 	oxyLogger             = &OxyLogger{}
+	context               *core.Context
 )
 
 func main() {
@@ -55,7 +57,6 @@ func main() {
 	var providers = []provider.Provider{}
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	var serverLock sync.Mutex
-
 	// load global configuration
 	globalConfiguration := LoadFileConfig(*globalConfigFile)
 
@@ -83,6 +84,16 @@ func main() {
 	}
 	log.Debugf("Global configuration loaded %+v", globalConfiguration)
 	configurationRouter = LoadDefaultConfig(globalConfiguration)
+
+	// IPVS context
+	opts := core.ContextOptions{
+		Flush:     true,
+		Endpoints: []net.IP{},
+	}
+	context, err = core.NewContext(opts)
+	if err != nil {
+		log.Fatalf("Unable to create IPVS context %s", err)
+	}
 
 	// listen new configurations from providers
 	go func() {
@@ -134,7 +145,7 @@ func main() {
 					if err != nil {
 						log.Fatal("Error preparing server: ", err)
 					}
-					go startServer(newsrv, globalConfiguration)
+					go startServer(newsrv, globalConfiguration, newConfigurations)
 					srv = newsrv
 					time.Sleep(1 * time.Second)
 					if oldServer != nil {
@@ -196,6 +207,10 @@ func main() {
 		log.Infof("I have to go... %+v", sig)
 		log.Info("Stopping server")
 		srv.Close()
+		///////////////////////////////////////////////////////////////////////////////
+		//							IPVS
+		///////////////////////////////////////////////////////////////////////////////
+		context.Close()
 		stopChan <- true
 	}()
 
@@ -208,7 +223,7 @@ func main() {
 	if er != nil {
 		log.Fatal("Error preparing server: ", er)
 	}
-	go startServer(srv, globalConfiguration)
+	go startServer(srv, globalConfiguration, currentConfigurations)
 	//TODO change that!
 	time.Sleep(100 * time.Millisecond)
 	serverLock.Unlock()
@@ -242,7 +257,7 @@ func createTLSConfig(certs []Certificate) (*tls.Config, error) {
 	return config, nil
 }
 
-func startServer(srv *manners.GracefulServer, globalConfiguration *GlobalConfiguration) {
+func startServer(srv *manners.GracefulServer, globalConfiguration *GlobalConfiguration, configurations configs) {
 	log.Info("Starting server")
 	if srv.TLSConfig != nil {
 		err := srv.ListenAndServeTLSWithConfig(srv.TLSConfig)
@@ -256,6 +271,12 @@ func startServer(srv *manners.GracefulServer, globalConfiguration *GlobalConfigu
 		}
 	}
 	log.Info("Server stopped")
+	for _, v := range configurations {
+		for _, backend := range v.Backends {
+			log.Infof("Destroying backend %+v", backend)
+			backend.OnDestroy()
+		}
+	}
 }
 
 func prepareServer(router *mux.Router, globalConfiguration *GlobalConfiguration, oldServer *manners.GracefulServer, middlewares ...negroni.Handler) (*manners.GracefulServer, error) {
@@ -292,16 +313,26 @@ func prepareServer(router *mux.Router, globalConfiguration *GlobalConfiguration,
 	return server, nil
 }
 
-// LoadConfig returns a new gorrilla.mux Route from the specified global configuration and the dynamic
+// LoadConfig returns a new gorilla.mux Route from the specified global configuration and the dynamic
 // provider configurations.
 func LoadConfig(configurations configs, globalConfiguration *GlobalConfiguration) (*mux.Router, error) {
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
+	var transport http.RoundTripper = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 10 * time.Second,
+		DisableKeepAlives:   true,
+	}
 	backends := map[string]http.Handler{}
 	for _, configuration := range configurations {
 		for frontendName, frontend := range configuration.Frontends {
 			log.Debugf("Creating frontend %s", frontendName)
-			fwd, _ := forward.New(forward.Logger(oxyLogger), forward.PassHostHeader(frontend.PassHostHeader))
+
+			fwd, _ := forward.New(forward.Logger(oxyLogger), forward.PassHostHeader(frontend.PassHostHeader), forward.RoundTripper(transport))
 			newRoute := router.NewRoute().Name(frontendName)
 			for routeName, route := range frontend.Routes {
 				log.Debugf("Creating route %s %s:%s", routeName, route.Rule, route.Value)
@@ -313,40 +344,21 @@ func LoadConfig(configurations configs, globalConfiguration *GlobalConfiguration
 			}
 			if backends[frontend.Backend] == nil {
 				log.Debugf("Creating backend %s", frontend.Backend)
-				var lb http.Handler
-				rr, _ := roundrobin.New(fwd)
 				if configuration.Backends[frontend.Backend] == nil {
 					return nil, errors.New("Backend not found: " + frontend.Backend)
 				}
-				lbMethod, err := types.NewLoadBalancerMethod(configuration.Backends[frontend.Backend].LoadBalancer)
+
+				_, err := types.NewLoadBalancerMethod(configuration.Backends[frontend.Backend].LoadBalancer)
 				if err != nil {
 					configuration.Backends[frontend.Backend].LoadBalancer = &types.LoadBalancer{Method: "wrr"}
 				}
-				switch lbMethod {
-				case types.Drr:
-					log.Infof("Creating load-balancer drr")
-					rebalancer, _ := roundrobin.NewRebalancer(rr, roundrobin.RebalancerLogger(oxyLogger))
-					lb = rebalancer
-					for serverName, server := range configuration.Backends[frontend.Backend].Servers {
-						url, err := url.Parse(server.URL)
-						if err != nil {
-							return nil, err
-						}
-						log.Infof("Creating server %s %s", serverName, url.String())
-						rebalancer.UpsertServer(url, roundrobin.Weight(server.Weight))
-					}
-				case types.Wrr:
-					log.Infof("Creating load-balancer wrr")
-					lb = middlewares.NewWebsocketUpgrader(rr)
-					for serverName, server := range configuration.Backends[frontend.Backend].Servers {
-						url, err := url.Parse(server.URL)
-						if err != nil {
-							return nil, err
-						}
-						log.Infof("Creating server %s %s", serverName, url.String())
-						rr.UpsertServer(url, roundrobin.Weight(server.Weight))
-					}
+
+				// create IPVS backend
+				lb, err := lb.NewIpvsBackend(frontend.Backend, configuration.Backends[frontend.Backend], fwd, context)
+				if err != nil {
+					return nil, err
 				}
+
 				var negroni = negroni.New()
 				if configuration.Backends[frontend.Backend].CircuitBreaker != nil {
 					log.Infof("Creating circuit breaker %s", configuration.Backends[frontend.Backend].CircuitBreaker.Expression)

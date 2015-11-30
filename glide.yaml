@@ -142,6 +142,12 @@ import:
   - package: github.com/codahale/hdrhistogram
     ref:     954f16e8b9ef0e5d5189456aa4c1202758e04f17
   - package: github.com/gorilla/websocket
+  - package: github.com/tehnerd/gnl2go
+    ref:     804f9a72f673ff3e29b7a21436bf9e57426a7070
+  - package: github.com/kobolog/gorb
+    ref:     496d29d8b75355ff7cb9cc153e084ace989c2d88
+    subpackages:
+      - /core
   - package: github.com/donovanhide/eventsource
     ref:     d8a3071799b98cacd30b6da92f536050ccfe6da4
   - package: github.com/golang/glog
