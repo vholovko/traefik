@@ -171,13 +171,13 @@ Routes to your services will be created instantly.</p>
 
 <h3 id="docker">Docker</h3>
 <p>Using the tiny Docker image:</p>
-<pre><code class="shell">docker run -d -p 8080:8080 -p 80:80 -v $PWD/traefik.toml:/etc/traefik/traefik.toml containous/traefik
+<pre><code class="shell">docker run -d -p 8080:8080 -p 80:80 -v $PWD/traefik.toml:/etc/traefik/traefik.toml traefik
 </code></pre>
 
 <h2 id="test-it">Test it</h2>
 <p>You can test Træfɪk easily using <a href="https://docs.docker.com/compose">Docker compose</a>, with this <code>docker-compose.yml</code> file:</p>
 <pre><code class="yaml">traefik:
-  image: containous/traefik
+  image: traefik
   command: --web --docker --docker.domain=docker.localhost --logLevel=DEBUG
   ports:
     - &quot;80:80&quot;
