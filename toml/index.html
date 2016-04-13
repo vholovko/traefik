@@ -296,7 +296,7 @@
 # storageFile = &quot;acme.json&quot;
 
 # Entrypoint to proxy acme challenge to.
-# WARNING, must point to an entrypoint on port 443 
+# WARNING, must point to an entrypoint on port 443
 #
 # Required
 #
@@ -373,6 +373,9 @@ defaultEntryPoints = [&quot;http&quot;, &quot;https&quot;]
     url = &quot;http://172.17.0.3:80&quot;
     weight = 1
   [backends.backend2]
+    [backends.backend1.maxconn]
+      amount = 10
+      extractorfunc = &quot;request.host&quot;
     [backends.backend2.LoadBalancer]
       method = &quot;drr&quot;
     [backends.backend2.servers.server1]
@@ -435,6 +438,9 @@ filename = &quot;rules.toml&quot;
     url = &quot;http://172.17.0.3:80&quot;
     weight = 1
   [backends.backend2]
+    [backends.backend1.maxconn]
+      amount = 10
+      extractorfunc = &quot;request.host&quot;
     [backends.backend2.LoadBalancer]
       method = &quot;drr&quot;
     [backends.backend2.servers.server1]
@@ -998,6 +1004,14 @@ used in consul.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>/traefik/backends/backend2/maxconn/amount</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>/traefik/backends/backend2/maxconn/extractorfunc</code></td>
+<td><code>request.host</code></td>
+</tr>
 <tr>
 <td><code>/traefik/backends/backend2/loadbalancer/method</code></td>
 <td><code>drr</code></td>

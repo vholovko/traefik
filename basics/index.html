@@ -229,7 +229,7 @@ Various methods of load-balancing is supported:</p>
 Initial state is Standby. CB observes the statistics and does not modify the request.
 In case if condition matches, CB enters Tripped state, where it responds with predefines code or redirects to another frontend.
 Once Tripped timer expires, CB enters Recovering state and resets all stats.
-In case if the condition does not match and recovery timer expries, CB enters Standby state.</p>
+In case if the condition does not match and recovery timer expires, CB enters Standby state.</p>
 <p>It can be configured using:</p>
 <ul>
 <li>Methods: <code>LatencyAtQuantileMS</code>, <code>NetworkErrorRatio</code>, <code>ResponseCodeRatio</code></li>
@@ -240,6 +240,24 @@ In case if the condition does not match and recovery timer expries, CB enters St
 <li><code>NetworkErrorRatio() &gt; 0.5</code>: watch error ratio over 10 second sliding window for a frontend</li>
 <li><code>LatencyAtQuantileMS(50.0) &gt; 50</code>:  watch latency at quantile in milliseconds.</li>
 <li><code>ResponseCodeRatio(500, 600, 0, 600) &gt; 0.5</code>: ratio of response codes in range [500-600) to  [0-600)</li>
+</ul>
+<p>To proactively prevent backends from being overwhelmed with high load, a maximum connection limit can
+also be applied to each backend.</p>
+<p>Maximum connections can be configured by specifying an integer value for <code>maxconn.amount</code> and
+<code>maxconn.extractorfunc</code> which is a strategy used to determine how to categorize requests in order to
+evaluate the maximum connections.</p>
+<p>For example:</p>
+<pre><code class="toml">[backends]
+  [backends.backend1]
+    [backends.backend1.maxconn]
+       amount = 10
+       extractorfunc = &quot;request.host&quot;
+</code></pre>
+
+<ul>
+<li><code>backend1</code> will return <code>HTTP code 429 Too Many Requests</code> if there are already 10 requests in progress for the same Host header.</li>
+<li>Another possible value for <code>extractorfunc</code> is <code>client.ip</code> which will categorize requests based on client source ip.</li>
+<li>Lastly <code>extractorfunc</code> can take the value of <code>request.header.ANY_HEADER</code> which will categorize requests based on <code>ANY_HEADER</code> that you provide.</li>
 </ul>
 <h2 id="servers">Servers</h2>
 <p>Servers are simply defined using a <code>URL</code>. You can also apply a custom <code>weight</code> to each server (this will be used by load-balacning).</p>
