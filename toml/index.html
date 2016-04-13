@@ -809,10 +809,25 @@ endpoint = &quot;127.0.0.1:8500&quot;
 # Optional
 #
 domain = &quot;consul.localhost&quot;
+
+# Prefix for Consul catalog tags
+#
+# Optional
+#
+prefix = &quot;traefik&quot;
 </code></pre>
 
 <p>This backend will create routes matching on hostname based on the service name
 used in consul.</p>
+<p>Additional settings can be defined using Consul Catalog tags:
+- <code>traefik.enable=false</code>: disable this container in Træfɪk
+- <code>traefik.protocol=https</code>: override the default <code>http</code> protocol
+- <code>traefik.backend.weight=10</code>: assign this weight to the container
+- <code>traefik.backend.circuitbreaker=NetworkErrorRatio() &gt; 0.5</code>
+- <code>traefik.backend.loadbalancer=drr</code>: override the default load balancing mode
+- <code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>). See <a href="#frontends">frontends</a>.
+- <code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.
+- <code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</p>
 <h2 id="etcd-backend">Etcd backend</h2>
 <p>Træfɪk can be configured to use Etcd as a backend configuration:</p>
 <pre><code class="toml">################################################################
