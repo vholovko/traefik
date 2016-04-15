@@ -70,6 +70,27 @@
             
             
             
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        
+<li >
+    <a href="../user-guide/examples/">Configuration examples</a>
+</li>
+
+                    
+                        
+<li >
+    <a href="../user-guide/swarm/">Swarm cluster</a>
+</li>
+
+                    
+                    </ul>
+                </li>
+            
+            
+            
                 <li >
                     <a href="../benchmarks/">Benchmarks</a>
                 </li>
@@ -90,7 +111,7 @@
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../benchmarks/">
+                    <a rel="prev" href="../user-guide/examples/">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -147,19 +168,6 @@
             <li><a href="#key-value-storage-structure">Key-value storage structure</a></li>
         
             <li><a href="#atomic-configuration-changes">Atomic configuration changes</a></li>
-        
-    
-        <li class="main "><a href="#examples">Examples</a></li>
-        
-            <li><a href="#http-only">HTTP only</a></li>
-        
-            <li><a href="#http-https-with-sni">HTTP + HTTPS (with SNI)</a></li>
-        
-            <li><a href="#http-redirect-on-https">HTTP redirect on HTTPS</a></li>
-        
-            <li><a href="#lets-encrypt-support">Let's Encrypt support</a></li>
-        
-            <li><a href="#override-entrypoints-in-frontends">Override entrypoints in frontends</a></li>
         
     
     </ul>
@@ -251,6 +259,10 @@
 #     [entryPoints.http.redirect]
 #       regex = &quot;^http://localhost/(.*)&quot;
 #       replacement = &quot;http://mydomain/$1&quot;
+
+entryPoints]
+  [entryPoints.http]
+  address = &quot;:80&quot;
 </code></pre>
 
 <h2 id="retry-configuration">Retry configuration</h2>
@@ -258,7 +270,7 @@
 #
 # Optional
 #
-# [retry]
+[retry]
 
 # Number of attempts
 #
@@ -280,27 +292,27 @@
 #
 # Optional
 #
-# [acme]
+[acme]
 
 # Email address used for registration
 #
 # Required
 #
-# email = &quot;test@traefik.io&quot;
+email = &quot;test@traefik.io&quot;
 
 # File used for certificates storage.
 # WARNING, if you use Traefik in Docker, don't forget to mount this file as a volume.
 #
 # Required
 #
-# storageFile = &quot;acme.json&quot;
+storageFile = &quot;acme.json&quot;
 
 # Entrypoint to proxy acme challenge to.
 # WARNING, must point to an entrypoint on port 443
 #
 # Required
 #
-# entryPoint = &quot;https&quot;
+entryPoint = &quot;https&quot;
 
 # Enable on demand certificate. This will request a certificate from Let's Encrypt during the first TLS handshake for a hostname that does not yet have a certificate.
 # WARNING, TLS handshakes will be slow when requesting a hostname certificate for the first time, this can leads to DoS attacks.
@@ -333,6 +345,13 @@
 #   main = &quot;local3.com&quot;
 # [[acme.domains]]
 #   main = &quot;local4.com&quot;
+[[acme.domains]]
+   main = &quot;local1.com&quot;
+   sans = [&quot;test1.local1.com&quot;, &quot;test2.local1.com&quot;]
+[[acme.domains]]
+   main = &quot;local3.com&quot;
+[[acme.domains]]
+   main = &quot;local4.com&quot;
 </code></pre>
 
 <h1 id="configuration-backends">Configuration backends</h1>
@@ -846,25 +865,25 @@ used in consul.</p>
 #
 # Optional
 #
-# [etcd]
+[etcd]
 
 # Etcd server endpoint
 #
 # Required
 #
-# endpoint = &quot;127.0.0.1:4001&quot;
+endpoint = &quot;127.0.0.1:4001&quot;
 
 # Enable watch Etcd changes
 #
 # Optional
 #
-# watch = true
+watch = true
 
 # Prefix used for KV store.
 #
 # Optional
 #
-# prefix = &quot;/traefik&quot;
+prefix = &quot;/traefik&quot;
 
 # Override default configuration template. For advanced users :)
 #
@@ -894,25 +913,25 @@ used in consul.</p>
 #
 # Optional
 #
-# [zookeeper]
+[zookeeper]
 
 # Zookeeper server endpoint
 #
 # Required
 #
-# endpoint = &quot;127.0.0.1:2181&quot;
+endpoint = &quot;127.0.0.1:2181&quot;
 
 # Enable watch Zookeeper changes
 #
 # Optional
 #
-# watch = true
+watch = true
 
 # Prefix used for KV store.
 #
 # Optional
 #
-# prefix = &quot;/traefik&quot;
+prefix = &quot;/traefik&quot;
 
 # Override default configuration template. For advanced users :)
 #
@@ -932,25 +951,25 @@ used in consul.</p>
 #
 # Optional
 #
-# [boltdb]
+[boltdb]
 
 # BoltDB file
 #
 # Required
 #
-# endpoint = &quot;/my.db&quot;
+endpoint = &quot;/my.db&quot;
 
 # Enable watch BoltDB changes
 #
 # Optional
 #
-# watch = true
+watch = true
 
 # Prefix used for KV store.
 #
 # Optional
 #
-# prefix = &quot;/traefik&quot;
+prefix = &quot;/traefik&quot;
 
 # Override default configuration template. For advanced users :)
 #
@@ -1189,91 +1208,7 @@ used in consul.</p>
 </tr>
 </tbody>
 </table>
-<p>Note that Træfɪk <em>will not watch for key changes in the <code>/traefik_configurations</code> prefix</em>. It will only watch for changes in the <code>/traefik</code> prefix. Further, if the <code>/traefik/alias</code> key is set, all other sibling keys with the <code>/traefik</code> prefix are ignored.</p>
-<h1 id="examples">Examples</h1>
-<h2 id="http-only">HTTP only</h2>
-<pre><code>defaultEntryPoints = [&quot;http&quot;]
-[entryPoints]
-  [entryPoints.http]
-  address = &quot;:80&quot;
-</code></pre>
-
-<h2 id="http-https-with-sni">HTTP + HTTPS (with SNI)</h2>
-<pre><code>defaultEntryPoints = [&quot;http&quot;, &quot;https&quot;]
-[entryPoints]
-  [entryPoints.http]
-  address = &quot;:80&quot;
-  [entryPoints.https]
-  address = &quot;:443&quot;
-    [entryPoints.https.tls]
-      [[entryPoints.https.tls.certificates]]
-      CertFile = &quot;integration/fixtures/https/snitest.com.cert&quot;
-      KeyFile = &quot;integration/fixtures/https/snitest.com.key&quot;
-      [[entryPoints.https.tls.certificates]]
-      CertFile = &quot;integration/fixtures/https/snitest.org.cert&quot;
-      KeyFile = &quot;integration/fixtures/https/snitest.org.key&quot;
-</code></pre>
-
-<h2 id="http-redirect-on-https">HTTP redirect on HTTPS</h2>
-<pre><code>defaultEntryPoints = [&quot;http&quot;, &quot;https&quot;]
-[entryPoints]
-  [entryPoints.http]
-  address = &quot;:80&quot;
-    [entryPoints.http.redirect]
-    entryPoint = &quot;https&quot;
-  [entryPoints.https]
-  address = &quot;:443&quot;
-    [entryPoints.https.tls]
-      [[entryPoints.https.tls.certificates]]
-      certFile = &quot;tests/traefik.crt&quot;
-      keyFile = &quot;tests/traefik.key&quot;
-</code></pre>
-
-<h2 id="lets-encrypt-support">Let's Encrypt support</h2>
-<pre><code>[entryPoints]
-  [entryPoints.https]
-  address = &quot;:443&quot;
-    [entryPoints.https.tls]
-      # certs used as default certs
-      [[entryPoints.https.tls.certificates]]
-      certFile = &quot;tests/traefik.crt&quot;
-      keyFile = &quot;tests/traefik.key&quot;
-[acme]
-email = &quot;test@traefik.io&quot;
-storageFile = &quot;acme.json&quot;
-onDemand = true
-caServer = &quot;http://172.18.0.1:4000/directory&quot;
-entryPoint = &quot;https&quot;
-
-[[acme.domains]]
-  main = &quot;local1.com&quot;
-  sans = [&quot;test1.local1.com&quot;, &quot;test2.local1.com&quot;]
-[[acme.domains]]
-  main = &quot;local2.com&quot;
-  sans = [&quot;test1.local2.com&quot;, &quot;test2x.local2.com&quot;]
-[[acme.domains]]
-  main = &quot;local3.com&quot;
-[[acme.domains]]
-  main = &quot;local4.com&quot;
-</code></pre>
-
-<h2 id="override-entrypoints-in-frontends">Override entrypoints in frontends</h2>
-<pre><code>[frontends]
-  [frontends.frontend1]
-  backend = &quot;backend2&quot;
-    [frontends.frontend1.routes.test_1]
-    rule = &quot;Host:test.localhost&quot;
-  [frontends.frontend2]
-  backend = &quot;backend1&quot;
-  passHostHeader = true
-  entrypoints = [&quot;https&quot;] # overrides defaultEntryPoints
-    [frontends.frontend2.routes.test_1]
-    rule = &quot;Host:{subdomain:[a-z]+}.localhost&quot;
-  [frontends.frontend3]
-  entrypoints = [&quot;http&quot;, &quot;https&quot;] # overrides defaultEntryPoints
-  backend = &quot;backend2&quot;
-    rule = &quot;Path:/test&quot;
-</code></pre></div>
+<p>Note that Træfɪk <em>will not watch for key changes in the <code>/traefik_configurations</code> prefix</em>. It will only watch for changes in the <code>/traefik</code> prefix. Further, if the <code>/traefik/alias</code> key is set, all other sibling keys with the <code>/traefik</code> prefix are ignored.</p></div>
         </div>
 
         <footer class="col-md-12">

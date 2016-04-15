@@ -26,6 +26,22 @@
     
 
     
+        
+    <url>
+     <loc>https://docs.traefik.io/user-guide/examples/</loc>
+     <lastmod>2016-04-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://docs.traefik.io/user-guide/swarm/</loc>
+     <lastmod>2016-04-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
     <url>
      <loc>https://docs.traefik.io/benchmarks/</loc>
      <lastmod>2016-04-15</lastmod>
