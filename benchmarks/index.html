@@ -317,9 +317,11 @@ Transfer/sec:      3.14MB
 <h2 id="conclusion">Conclusion</h2>
 <p>Traefik is obviously slower than Nginx, but not so much: Traefik can serve 28392 requests/sec and Nginx 33591 requests/sec which gives a ratio of 85%.
 Not bad for young project :) !</p>
-<p>Some areas of possible improvements:
-- Use <a href="https://github.com/kavu/go_reuseport">GO_REUSEPORT</a> listener
-- Run a separate server instance per CPU core with <code>GOMAXPROCS=1</code> (it appears during benchmarks that there is a lot more context switches with traefik than with nginx)</p></div>
+<p>Some areas of possible improvements:</p>
+<ul>
+<li>Use <a href="https://github.com/kavu/go_reuseport">GO_REUSEPORT</a> listener</li>
+<li>Run a separate server instance per CPU core with <code>GOMAXPROCS=1</code> (it appears during benchmarks that there is a lot more context switches with traefik than with nginx)</li>
+</ul></div>
         </div>
 
         <footer class="col-md-12">

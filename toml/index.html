@@ -664,7 +664,7 @@ watch = true
 <li><code>traefik.protocol=https</code>: override the default <code>http</code> protocol</li>
 <li><code>traefik.weight=10</code>: assign this weight to the container</li>
 <li><code>traefik.enable=false</code>: disable this container in Træfɪk</li>
-<li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>). See <a href="#frontends">frontends</a>.</li>
+<li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
 <li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
@@ -739,7 +739,7 @@ domain = &quot;marathon.localhost&quot;
 <li><code>traefik.protocol=https</code>: override the default <code>http</code> protocol</li>
 <li><code>traefik.weight=10</code>: assign this weight to the application</li>
 <li><code>traefik.enable=false</code>: disable this application in Træfɪk</li>
-<li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>). See <a href="#frontends">frontends</a>.</li>
+<li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
 <li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
@@ -825,15 +825,17 @@ prefix = &quot;traefik&quot;
 
 <p>This backend will create routes matching on hostname based on the service name
 used in consul.</p>
-<p>Additional settings can be defined using Consul Catalog tags:
-- <code>traefik.enable=false</code>: disable this container in Træfɪk
-- <code>traefik.protocol=https</code>: override the default <code>http</code> protocol
-- <code>traefik.backend.weight=10</code>: assign this weight to the container
-- <code>traefik.backend.circuitbreaker=NetworkErrorRatio() &gt; 0.5</code>
-- <code>traefik.backend.loadbalancer=drr</code>: override the default load balancing mode
-- <code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>). See <a href="#frontends">frontends</a>.
-- <code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.
-- <code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</p>
+<p>Additional settings can be defined using Consul Catalog tags:</p>
+<ul>
+<li><code>traefik.enable=false</code>: disable this container in Træfɪk</li>
+<li><code>traefik.protocol=https</code>: override the default <code>http</code> protocol</li>
+<li><code>traefik.backend.weight=10</code>: assign this weight to the container</li>
+<li><code>traefik.backend.circuitbreaker=NetworkErrorRatio() &gt; 0.5</code></li>
+<li><code>traefik.backend.loadbalancer=drr</code>: override the default load balancing mode</li>
+<li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
+<li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
+<li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
+</ul>
 <h2 id="etcd-backend">Etcd backend</h2>
 <p>Træfɪk can be configured to use Etcd as a backend configuration:</p>
 <pre><code class="toml">################################################################
