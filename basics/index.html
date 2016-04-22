@@ -168,7 +168,7 @@ If you want your users to access some of your microservices from the Internet, y
 <p><img alt="Architecture" src="../img/internal.png" /></p>
 <ul>
 <li>Incoming requests end on <a href="#entrypoints">entrypoints</a>, as the name suggests, they are the network entry points into Træfɪk (listening port, SSL, traffic redirection...).</li>
-<li>Traffic is then forwared to a matching <a href="#frontends">frontend</a>. A frontend defines routes from <a href="#entrypoints">entrypoints</a> to <a href="#backends">backends</a>.
+<li>Traffic is then forwarded to a matching <a href="#frontends">frontend</a>. A frontend defines routes from <a href="#entrypoints">entrypoints</a> to <a href="#backends">backends</a>.
 Routes are created using requests fields (<code>Host</code>, <code>Path</code>, <code>Headers</code>...) and can match or not a request.</li>
 <li>The <a href="#frontends">frontend</a> will then send the request to a <a href="#backends">backend</a>. A backend can be composed by one or more <a href="#servers">servers</a>, and by a load-balancing strategy.</li>
 <li>Finally, the <a href="#servers">server</a> will forward the request to the corresponding microservice in the private network.</li>
@@ -281,7 +281,7 @@ evaluate the maximum connections.</p>
 <li>Lastly <code>extractorfunc</code> can take the value of <code>request.header.ANY_HEADER</code> which will categorize requests based on <code>ANY_HEADER</code> that you provide.</li>
 </ul>
 <h2 id="servers">Servers</h2>
-<p>Servers are simply defined using a <code>URL</code>. You can also apply a custom <code>weight</code> to each server (this will be used by load-balacning).</p>
+<p>Servers are simply defined using a <code>URL</code>. You can also apply a custom <code>weight</code> to each server (this will be used by load-balancing).</p>
 <p>Here is an example of backends and servers definition:</p>
 <pre><code class="toml">[backends]
   [backends.backend1]
