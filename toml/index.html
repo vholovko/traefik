@@ -155,6 +155,8 @@
         
             <li><a href="#marathon-backend">Marathon backend</a></li>
         
+            <li><a href="#kubernetes-ingress-backend">Kubernetes Ingress backend</a></li>
+        
             <li><a href="#consul-backend">Consul backend</a></li>
         
             <li><a href="#consul-catalog-backend">Consul catalog backend</a></li>
@@ -763,6 +765,31 @@ domain = &quot;marathon.localhost&quot;
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
 <li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
 </ul>
+<h2 id="kubernetes-ingress-backend">Kubernetes Ingress backend</h2>
+<p>Træfɪk can be configured to use Kubernetes Ingress as a backend configuration:</p>
+<pre><code class="toml">################################################################
+# Kubernetes Ingress configuration backend
+################################################################
+# Enable Kubernetes Ingress configuration backend
+#
+# Optional
+#
+[kubernetes]
+
+# Kubernetes server endpoint
+#
+# When deployed as a replication controller in Kubernetes,
+# Traefik will use env variable KUBERNETES_SERVICE_HOST
+# and KUBERNETES_SERVICE_PORT_HTTPS as endpoint
+# Secure token will be found in /var/run/secrets/kubernetes.io/serviceaccount/token
+# and SSL CA cert in /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+# 
+# Optional
+#
+# endpoint = &quot;http://localhost:8080&quot;
+</code></pre>
+
+<p>You can find here an example <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.ingress.yaml">ingress</a> and <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.rc.yaml">replication controller</a>.</p>
 <h2 id="consul-backend">Consul backend</h2>
 <p>Træfɪk can be configured to use Consul as a backend configuration:</p>
 <pre><code class="toml">################################################################
