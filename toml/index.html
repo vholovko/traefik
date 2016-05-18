@@ -797,6 +797,10 @@ domain = &quot;marathon.localhost&quot;
 # namespaces = [&quot;default&quot;,&quot;production&quot;]
 </code></pre>
 
+<p>Annotations can be used on containers to override default behaviour for the whole Ingress resource:</p>
+<ul>
+<li><code>traefik.frontend.rule.type: PathPrefixStrip</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
+</ul>
 <p>You can find here an example <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.ingress.yaml">ingress</a> and <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.rc.yaml">replication controller</a>.</p>
 <h2 id="consul-backend">Consul backend</h2>
 <p>Træfɪk can be configured to use Consul as a backend configuration:</p>
