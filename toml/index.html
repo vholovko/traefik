@@ -144,6 +144,8 @@
         
             <li><a href="#acme-lets-encrypt-configuration">ACME (Let's Encrypt) configuration</a></li>
         
+            <li><a href="#constraints">Constraints</a></li>
+        
     
         <li class="main "><a href="#configuration-backends">Configuration backends</a></li>
         
@@ -363,6 +365,46 @@ entryPoint = &quot;https&quot;
    main = &quot;local4.com&quot;
 </code></pre>
 
+<h2 id="constraints">Constraints</h2>
+<p>In a micro-service architecture, with a central service discovery, setting constraints limits Træfɪk scope to a smaller number of routes.</p>
+<p>Træfɪk filters services according to service attributes/tags set in your configuration backends.</p>
+<p>Supported backends:</p>
+<ul>
+<li>Consul Catalog</li>
+</ul>
+<p>Supported filters:</p>
+<ul>
+<li><code>tag</code></li>
+</ul>
+<pre><code># Constraints definition
+
+#
+# Optional
+#
+
+# Simple matching constraint
+# constraints = [&quot;tag==api&quot;]
+
+# Simple mismatching constraint
+# constraints = [&quot;tag!=api&quot;]
+
+# Globbing
+# constraints = [&quot;tag==us-*&quot;]
+
+# Backend-specific constraint
+# [consulCatalog]
+#   endpoint = 127.0.0.1:8500
+#   constraints = [&quot;tag==api&quot;]
+
+# Multiple constraints
+#   - &quot;tag==&quot; must match with at least one tag
+#   - &quot;tag!=&quot; must match with none of tags
+# constraints = [&quot;tag!=us-*&quot;, &quot;tag!=asia-*&quot;]
+# [consulCatalog]
+#   endpoint = 127.0.0.1:8500
+#   constraints = [&quot;tag==api&quot;, &quot;tag!=v*-beta&quot;]
+</code></pre>
+
 <h1 id="configuration-backends">Configuration backends</h1>
 <h2 id="file-backend">File backend</h2>
 <p>Like any other reverse proxy, Træfɪk can be configured with a file. You have two choices:</p>
@@ -421,6 +463,7 @@ defaultEntryPoints = [&quot;http&quot;, &quot;https&quot;]
   [frontends.frontend2]
   backend = &quot;backend1&quot;
   passHostHeader = true
+  priority = 10
   entrypoints = [&quot;https&quot;] # overrides defaultEntryPoints
     [frontends.frontend2.routes.test_1]
     rule = &quot;Host:{subdomain:[a-z]+}.localhost&quot;
@@ -486,6 +529,7 @@ filename = &quot;rules.toml&quot;
   [frontends.frontend2]
   backend = &quot;backend1&quot;
   passHostHeader = true
+  priority = 10
   entrypoints = [&quot;https&quot;] # overrides defaultEntryPoints
     [frontends.frontend2.routes.test_1]
     rule = &quot;Host:{subdomain:[a-z]+}.localhost&quot;
@@ -694,8 +738,10 @@ watch = true
 <li><code>traefik.enable=false</code>: disable this container in Træfɪk</li>
 <li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
+<li><code>traefik.frontend.priority=10</code>: override default frontend priority</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
 <li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
+<li><code>traefik.docker.network</code>: Set the docker network to use for connections to this container</li>
 </ul>
 <h2 id="marathon-backend">Marathon backend</h2>
 <p>Træfɪk can be configured to use Marathon as a backend configuration:</p>
@@ -741,7 +787,16 @@ domain = &quot;marathon.localhost&quot;
 # Optional
 # Default: false
 #
-# ExposedByDefault = true
+# exposedByDefault = true
+
+# Convert Marathon groups to subdomains
+# Default behavior: /foo/bar/myapp =&gt; foo-bar-myapp.{defaultDomain}
+# with groupsAsSubDomains enabled: /foo/bar/myapp =&gt; myapp.bar.foo.{defaultDomain}
+#
+# Optional
+# Default: false
+#
+# groupsAsSubDomains = true
 
 # Enable Marathon basic authentication
 #
@@ -769,6 +824,7 @@ domain = &quot;marathon.localhost&quot;
 <li><code>traefik.enable=false</code>: disable this application in Træfɪk</li>
 <li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
+<li><code>traefik.frontend.priority=10</code>: override default frontend priority</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
 <li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
 </ul>
@@ -790,7 +846,7 @@ domain = &quot;marathon.localhost&quot;
 # and KUBERNETES_SERVICE_PORT_HTTPS as endpoint
 # Secure token will be found in /var/run/secrets/kubernetes.io/serviceaccount/token
 # and SSL CA cert in /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-# 
+#
 # Optional
 #
 # endpoint = &quot;http://localhost:8080&quot;
@@ -799,7 +855,7 @@ domain = &quot;marathon.localhost&quot;
 
 <p>Annotations can be used on containers to override default behaviour for the whole Ingress resource:</p>
 <ul>
-<li><code>traefik.frontend.rule.type: PathPrefixStrip</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
+<li><code>traefik.frontend.rule.type: PathPrefixStrip</code>: override the default frontend rule type (Default: <code>PathPrefix</code>).</li>
 </ul>
 <p>You can find here an example <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.ingress.yaml">ingress</a> and <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.rc.yaml">replication controller</a>.</p>
 <h2 id="consul-backend">Consul backend</h2>
@@ -879,6 +935,13 @@ domain = &quot;consul.localhost&quot;
 # Optional
 #
 prefix = &quot;traefik&quot;
+
+# Constraint on Consul catalog tags
+#
+# Optional
+#
+constraints = [&quot;tag==api&quot;, &quot;tag==he*ld&quot;]
+# Matching with containers having this tag: &quot;traefik.tags=api,helloworld&quot;
 </code></pre>
 
 <p>This backend will create routes matching on hostname based on the service name
@@ -892,6 +955,7 @@ used in consul.</p>
 <li><code>traefik.backend.loadbalancer=drr</code>: override the default load balancing mode</li>
 <li><code>traefik.frontend.rule=Host:test.traefik.io</code>: override the default frontend rule (Default: <code>Host:{containerName}.{domain}</code>).</li>
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
+<li><code>traefik.frontend.priority=10</code>: override default frontend priority</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
 </ul>
 <h2 id="etcd-backend">Etcd backend</h2>
@@ -1133,6 +1197,10 @@ prefix = &quot;/traefik&quot;
 <tr>
 <td><code>/traefik/frontends/frontend2/passHostHeader</code></td>
 <td><code>true</code></td>
+</tr>
+<tr>
+<td><code>/traefik/frontends/frontend2/priority</code></td>
+<td><code>10</code></td>
 </tr>
 <tr>
 <td><code>/traefik/frontends/frontend2/entrypoints</code></td>

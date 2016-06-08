@@ -215,6 +215,7 @@ Frontends can be defined using the following rules:</p>
 <li><code>PathPrefix</code>: PathPrefix adds a matcher for the URL path prefixes. This matches if the given template is a prefix of the full URL path.</li>
 <li><code>PathPrefixStrip</code>: Same as <code>PathPrefix</code> but strip the given prefix from the request URL's Path.</li>
 </ul>
+<p>You can use multiple rules by separating them by <code>;</code></p>
 <p>You can optionally enable <code>passHostHeader</code> to forward client <code>Host</code> header to the backend.</p>
 <p>Here is an example of frontends definition:</p>
 <pre><code class="toml">[frontends]
@@ -225,20 +226,39 @@ Frontends can be defined using the following rules:</p>
   [frontends.frontend2]
   backend = &quot;backend1&quot;
   passHostHeader = true
+  priority = 10
   entrypoints = [&quot;https&quot;] # overrides defaultEntryPoints
     [frontends.frontend2.routes.test_1]
     rule = &quot;Host: localhost, {subdomain:[a-z]+}.localhost&quot;
   [frontends.frontend3]
   backend = &quot;backend2&quot;
-    rule = &quot;Path:/test&quot;
+    rule = &quot;Host: test3.localhost;Path:/test&quot;
 </code></pre>
 
 <ul>
 <li>Three frontends are defined: <code>frontend1</code>, <code>frontend2</code> and <code>frontend3</code></li>
 <li><code>frontend1</code> will forward the traffic to the <code>backend2</code> if the rule <code>Host: test.localhost, test2.localhost</code> is matched</li>
 <li><code>frontend2</code> will forward the traffic to the <code>backend1</code> if the rule <code>Host: localhost, {subdomain:[a-z]+}.localhost</code> is matched (forwarding client <code>Host</code> header to the backend)</li>
-<li><code>frontend3</code> will forward the traffic to the <code>backend2</code> if the rule <code>Path:/test</code> is matched</li>
+<li><code>frontend3</code> will forward the traffic to the <code>backend2</code> if the rules <code>Host: test3.localhost</code> and <code>Path:/test</code> are matched</li>
 </ul>
+<p>By default, routes will be sorted using rules length (to avoid path overlap):
+<code>PathPrefix:/12345</code> will be matched before <code>PathPrefix:/1234</code> that will be matched before <code>PathPrefix:/1</code>.</p>
+<p>You can customize priority by frontend:</p>
+<pre><code>  [frontends]
+    [frontends.frontend1]
+    backend = &quot;backend1&quot;
+    priority = 10
+    passHostHeader = true
+      [frontends.frontend1.routes.test_1]
+      rule = &quot;PathPrefix:/to&quot;
+    [frontends.frontend2]
+    priority = 5
+    backend = &quot;backend2&quot;
+    passHostHeader = true
+      [frontends.frontend2.routes.test_1]
+      rule = &quot;PathPrefix:/toto&quot;
+</code></pre>
+
 <h2 id="backends">Backends</h2>
 <p>A backend is responsible to load-balance the traffic coming from one or more frontends to a set of http servers.
 Various methods of load-balancing is supported:</p>
