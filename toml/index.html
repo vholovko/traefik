@@ -144,8 +144,6 @@
         
             <li><a href="#acme-lets-encrypt-configuration">ACME (Let's Encrypt) configuration</a></li>
         
-            <li><a href="#constraints">Constraints</a></li>
-        
     
         <li class="main "><a href="#configuration-backends">Configuration backends</a></li>
         
@@ -282,13 +280,6 @@
 # Default: (number servers in backend) -1
 #
 # attempts = 3
-
-# Sets the maximum request body to be stored in memory in Mo
-#
-# Optional
-# Default: 2
-#
-# maxMem = 3
 </code></pre>
 
 <h2 id="acme-lets-encrypt-configuration">ACME (Let's Encrypt) configuration</h2>
@@ -311,7 +302,13 @@
 email = &quot;test@traefik.io&quot;
 
 # File used for certificates storage.
-# WARNING, if you use Traefik in Docker, don't forget to mount this file as a volume.
+# WARNING, if you use Traefik in Docker, you have 2 options:
+#  - create a file on your host and mount it has a volume
+#      storageFile = &quot;acme.json&quot;
+#      $ docker run -v &quot;/my/host/acme.json:acme.json&quot; traefik
+#  - mount the folder containing the file has a volume
+#      storageFile = &quot;/etc/traefik/acme/acme.json&quot;
+#      $ docker run -v &quot;/my/host/acme:/etc/traefik/acme&quot; traefik
 #
 # Required
 #
@@ -363,46 +360,6 @@ entryPoint = &quot;https&quot;
    main = &quot;local3.com&quot;
 [[acme.domains]]
    main = &quot;local4.com&quot;
-</code></pre>
-
-<h2 id="constraints">Constraints</h2>
-<p>In a micro-service architecture, with a central service discovery, setting constraints limits Træfɪk scope to a smaller number of routes.</p>
-<p>Træfɪk filters services according to service attributes/tags set in your configuration backends.</p>
-<p>Supported backends:</p>
-<ul>
-<li>Consul Catalog</li>
-</ul>
-<p>Supported filters:</p>
-<ul>
-<li><code>tag</code></li>
-</ul>
-<pre><code># Constraints definition
-
-#
-# Optional
-#
-
-# Simple matching constraint
-# constraints = [&quot;tag==api&quot;]
-
-# Simple mismatching constraint
-# constraints = [&quot;tag!=api&quot;]
-
-# Globbing
-# constraints = [&quot;tag==us-*&quot;]
-
-# Backend-specific constraint
-# [consulCatalog]
-#   endpoint = 127.0.0.1:8500
-#   constraints = [&quot;tag==api&quot;]
-
-# Multiple constraints
-#   - &quot;tag==&quot; must match with at least one tag
-#   - &quot;tag!=&quot; must match with none of tags
-# constraints = [&quot;tag!=us-*&quot;, &quot;tag!=asia-*&quot;]
-# [consulCatalog]
-#   endpoint = 127.0.0.1:8500
-#   constraints = [&quot;tag==api&quot;, &quot;tag!=v*-beta&quot;]
 </code></pre>
 
 <h1 id="configuration-backends">Configuration backends</h1>
@@ -812,6 +769,12 @@ domain = &quot;marathon.localhost&quot;
 #
 # [marathon.TLS]
 # InsecureSkipVerify = true
+
+# DCOSToken for DCOS environment, This will override the Authorization header
+#
+# Optional
+#
+# dcosToken = &quot;xxxxxx&quot;
 </code></pre>
 
 <p>Labels can be used on containers to override default behaviour:</p>
@@ -935,13 +898,6 @@ domain = &quot;consul.localhost&quot;
 # Optional
 #
 prefix = &quot;traefik&quot;
-
-# Constraint on Consul catalog tags
-#
-# Optional
-#
-constraints = [&quot;tag==api&quot;, &quot;tag==he*ld&quot;]
-# Matching with containers having this tag: &quot;traefik.tags=api,helloworld&quot;
 </code></pre>
 
 <p>This backend will create routes matching on hostname based on the service name
