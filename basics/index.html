@@ -232,6 +232,7 @@ Frontends can be defined using the following rules:</p>
     rule = &quot;Host: localhost, {subdomain:[a-z]+}.localhost&quot;
   [frontends.frontend3]
   backend = &quot;backend2&quot;
+    [frontends.frontend3.routes.test_1]
     rule = &quot;Host: test3.localhost;Path:/test&quot;
 </code></pre>
 
@@ -239,8 +240,38 @@ Frontends can be defined using the following rules:</p>
 <li>Three frontends are defined: <code>frontend1</code>, <code>frontend2</code> and <code>frontend3</code></li>
 <li><code>frontend1</code> will forward the traffic to the <code>backend2</code> if the rule <code>Host: test.localhost, test2.localhost</code> is matched</li>
 <li><code>frontend2</code> will forward the traffic to the <code>backend1</code> if the rule <code>Host: localhost, {subdomain:[a-z]+}.localhost</code> is matched (forwarding client <code>Host</code> header to the backend)</li>
-<li><code>frontend3</code> will forward the traffic to the <code>backend2</code> if the rules <code>Host: test3.localhost</code> and <code>Path:/test</code> are matched</li>
+<li><code>frontend3</code> will forward the traffic to the <code>backend2</code> if the rules <code>Host: test3.localhost</code> <strong>and</strong> <code>Path:/test</code> are matched</li>
 </ul>
+<h3 id="combining-multiple-rules">Combining multiple rules</h3>
+<p>As seen in the previous example, you can combine multiple rules.
+In TOML file, you can use multiple routes:</p>
+<pre><code class="toml">  [frontends.frontend3]
+  backend = &quot;backend2&quot;
+    [frontends.frontend3.routes.test_1]
+    rule = &quot;Host: test3.localhost&quot;
+    [frontends.frontend3.routes.test_2]
+    rule = &quot;Host: Path:/test&quot;
+</code></pre>
+
+<p>Here <code>frontend3</code> will forward the traffic to the <code>backend2</code> if the rules <code>Host: test3.localhost</code> <strong>and</strong> <code>Path:/test</code> are matched.
+You can also use the notation using a <code>;</code> separator:</p>
+<pre><code class="toml">  [frontends.frontend3]
+  backend = &quot;backend2&quot;
+    [frontends.frontend3.routes.test_1]
+    rule = &quot;Host: test3.localhost;Path:/test&quot;
+</code></pre>
+
+<p>Finally, you can create a rule to bind multiple domains or Path to a frontend, using the <code>,</code> separator:</p>
+<pre><code class="toml"> [frontends.frontend2]
+    [frontends.frontend2.routes.test_1]
+    rule = &quot;Host: test1.localhost,Host: test2.localhost&quot;
+  [frontends.frontend3]
+  backend = &quot;backend2&quot;
+    [frontends.frontend3.routes.test_1]
+    rule = &quot;Path:/test1,/test2&quot;
+</code></pre>
+
+<h3 id="priorities">Priorities</h3>
 <p>By default, routes will be sorted using rules length (to avoid path overlap):
 <code>PathPrefix:/12345</code> will be matched before <code>PathPrefix:/1234</code> that will be matched before <code>PathPrefix:/1</code>.</p>
 <p>You can customize priority by frontend:</p>

@@ -697,7 +697,6 @@ watch = true
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
 <li><code>traefik.frontend.priority=10</code>: override default frontend priority</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
-<li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
 <li><code>traefik.docker.network</code>: Set the docker network to use for connections to this container</li>
 </ul>
 <h2 id="marathon-backend">Marathon backend</h2>
@@ -727,7 +726,6 @@ endpoint = &quot;http://127.0.0.1:8080&quot;
 watch = true
 
 # Default domain used.
-# Can be overridden by setting the &quot;traefik.domain&quot; label on an application.
 #
 # Required
 #
@@ -789,7 +787,6 @@ domain = &quot;marathon.localhost&quot;
 <li><code>traefik.frontend.passHostHeader=true</code>: forward client <code>Host</code> header to the backend.</li>
 <li><code>traefik.frontend.priority=10</code>: override default frontend priority</li>
 <li><code>traefik.frontend.entryPoints=http,https</code>: assign this frontend to entry points <code>http</code> and <code>https</code>. Overrides <code>defaultEntryPoints</code>.</li>
-<li><code>traefik.domain=traefik.localhost</code>: override the default domain</li>
 </ul>
 <h2 id="kubernetes-ingress-backend">Kubernetes Ingress backend</h2>
 <p>Træfɪk can be configured to use Kubernetes Ingress as a backend configuration:</p>
