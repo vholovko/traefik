@@ -262,9 +262,10 @@ You can also use the notation using a <code>;</code> separator:</p>
 </code></pre>
 
 <p>Finally, you can create a rule to bind multiple domains or Path to a frontend, using the <code>,</code> separator:</p>
-<pre><code class="toml"> [frontends.frontend2]
+<pre><code class="toml">  [frontends.frontend2]
+  backend = &quot;backend1&quot;
     [frontends.frontend2.routes.test_1]
-    rule = &quot;Host: test1.localhost,Host: test2.localhost&quot;
+    rule = &quot;Host:test1.localhost,test2.localhost&quot;
   [frontends.frontend3]
   backend = &quot;backend2&quot;
     [frontends.frontend3.routes.test_1]
