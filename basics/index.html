@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="../img/traefik.icon.png">
         
 
-	<title>Basics - Traefik</title>
+	<title>Basics - Træfɪk</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -43,7 +43,7 @@
             </button>
 
             <!-- Main title -->
-            <a class="navbar-brand" href="..">Traefik</a>
+            <a class="navbar-brand" href="..">Træfɪk</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -86,13 +86,25 @@
 </li>
 
                     
+                        
+<li >
+    <a href="../user-guide/kubernetes/">Kubernetes</a>
+</li>
+
+                    
+                        
+<li >
+    <a href="../user-guide/kv-config/">Key-value store configuration</a>
+</li>
+
+                    
+                        
+<li >
+    <a href="../user-guide/cluster/">Clustering/HA</a>
+</li>
+
+                    
                     </ul>
-                </li>
-            
-            
-            
-                <li >
-                    <a href="../benchmarks/">Benchmarks</a>
                 </li>
             
             
@@ -145,7 +157,14 @@
             <li><a href="#servers">Servers</a></li>
         
     
-        <li class="main "><a href="#launch">Launch</a></li>
+        <li class="main "><a href="#configuration">Configuration</a></li>
+        
+            <li><a href="#static-trfk-configuration">Static Træfɪk configuration</a></li>
+        
+            <li><a href="#dynamic-trfk-configuration">Dynamic Træfɪk configuration</a></li>
+        
+    
+        <li class="main "><a href="#commands">Commands</a></li>
         
     
     </ul>
@@ -178,7 +197,7 @@ Routes are created using requests fields (<code>Host</code>, <code>Path</code>, 
 They can be defined using:</p>
 <ul>
 <li>a port (80, 443...)</li>
-<li>SSL (Certificates. Keys...)</li>
+<li>SSL (Certificates, Keys, authentication with a client certificate signed by a trusted CA...)</li>
 <li>redirection to another entrypoint (redirect <code>HTTP</code> to <code>HTTPS</code>)</li>
 </ul>
 <p>Here is an example of entrypoints definition:</p>
@@ -200,6 +219,22 @@ They can be defined using:</p>
 <li><code>http</code> listens on port <code>80</code> and <code>https</code> on port <code>443</code>.</li>
 <li>We enable SSL on <code>https</code> by giving a certificate and a key.</li>
 <li>We also redirect all the traffic from entrypoint <code>http</code> to <code>https</code>.</li>
+</ul>
+<p>And here is another example with client certificate authentication:</p>
+<pre><code class="toml">[entryPoints]
+  [entryPoints.https]
+  address = &quot;:443&quot;
+  [entryPoints.https.tls]
+  clientCAFiles = [&quot;tests/clientca1.crt&quot;, &quot;tests/clientca2.crt&quot;]
+    [[entryPoints.https.tls.certificates]]
+    certFile = &quot;tests/traefik.crt&quot;
+    keyFile = &quot;tests/traefik.key&quot;
+</code></pre>
+
+<ul>
+<li>We enable SSL on <code>https</code> by giving a certificate and a key.</li>
+<li>One or several files containing Certificate Authorities in PEM format are added.</li>
+<li>It is possible to have multiple CA:s in the same file or keep them in separate files.</li>
 </ul>
 <h2 id="frontends">Frontends</h2>
 <p>A frontend is a set of rules that forwards the incoming traffic from an entrypoint to a backend.
@@ -250,7 +285,7 @@ In TOML file, you can use multiple routes:</p>
     [frontends.frontend3.routes.test_1]
     rule = &quot;Host:test3.localhost&quot;
     [frontends.frontend3.routes.test_2]
-    rule = &quot;Host:Path:/test&quot;
+    rule = &quot;Path:/test&quot;
 </code></pre>
 
 <p>Here <code>frontend3</code> will forward the traffic to the <code>backend2</code> if the rules <code>Host:test3.localhost</code> <strong>AND</strong> <code>Path:/test</code> are matched.
@@ -332,6 +367,16 @@ evaluate the maximum connections.</p>
 <li>Another possible value for <code>extractorfunc</code> is <code>client.ip</code> which will categorize requests based on client source ip.</li>
 <li>Lastly <code>extractorfunc</code> can take the value of <code>request.header.ANY_HEADER</code> which will categorize requests based on <code>ANY_HEADER</code> that you provide.</li>
 </ul>
+<p>Sticky sessions are supported with both load balancers. When sticky sessions are enabled, a cookie called <code>_TRAEFIK_BACKEND</code> is set on the initial
+request. On subsequent requests, the client will be directed to the backend stored in the cookie if it is still healthy. If not, a new backend
+will be assigned.</p>
+<p>For example:</p>
+<pre><code class="toml">[backends]
+  [backends.backend1]
+    [backends.backend1.loadbalancer]
+      sticky = true
+</code></pre>
+
 <h2 id="servers">Servers</h2>
 <p>Servers are simply defined using a <code>URL</code>. You can also apply a custom <code>weight</code> to each server (this will be used by load-balancing).</p>
 <p>Here is an example of backends and servers definition:</p>
@@ -362,9 +407,25 @@ evaluate the maximum connections.</p>
 <li><code>backend2</code> will forward the traffic to two servers: <code>http://172.17.0.4:80"</code> with weight <code>1</code> and <code>http://172.17.0.5:80</code> with weight <code>2</code> using <code>drr</code> load-balancing strategy.</li>
 <li>a circuit breaker is added on <code>backend1</code> using the expression <code>NetworkErrorRatio() &gt; 0.5</code>: watch error ratio over 10 second sliding window</li>
 </ul>
-<h1 id="launch">Launch</h1>
-<p>Træfɪk can be configured using a TOML file configuration, arguments, or both.
-By default, Træfɪk will try to find a <code>traefik.toml</code> in the following places:</p>
+<h1 id="configuration">Configuration</h1>
+<p>Træfɪk's configuration has two parts: </p>
+<ul>
+<li>The <a href="../basics#static-trfk-configuration">static Træfɪk configuration</a> which is loaded only at the begining. </li>
+<li>The <a href="../basics#dynamic-trfk-configuration">dynamic Træfɪk configuration</a> which can be hot-reloaded (no need to restart the process).</li>
+</ul>
+<h2 id="static-trfk-configuration">Static Træfɪk configuration</h2>
+<p>The static configuration is the global configuration which setting up connections to configuration backends and entrypoints. </p>
+<p>Træfɪk can be configured using many configuration sources with the following precedence order. 
+Each item takes precedence over the item below it:</p>
+<ul>
+<li><a href="../basics/#key-value-stores">Key-value Store</a></li>
+<li><a href="../basics/#arguments">Arguments</a></li>
+<li><a href="../basics/#configuration-file">Configuration file</a></li>
+<li>Default</li>
+</ul>
+<p>It means that arguments overrides configuration file, and Key-value Store overrides arguments.</p>
+<h3 id="configuration-file">Configuration file</h3>
+<p>By default, Træfɪk will try to find a <code>traefik.toml</code> in the following places:</p>
 <ul>
 <li><code>/etc/traefik/</code></li>
 <li><code>$HOME/.traefik/</code></li>
@@ -374,14 +435,46 @@ By default, Træfɪk will try to find a <code>traefik.toml</code> in the followi
 <pre><code class="bash">$ traefik --configFile=foo/bar/myconfigfile.toml
 </code></pre>
 
-<p>Træfɪk uses the following precedence order. Each item takes precedence over the item below it:</p>
+<p>Please refer to the <a href="../toml/#global-configuration">global configuration</a> section to get documentation on it.</p>
+<h3 id="arguments">Arguments</h3>
+<p>Each argument (and command) is described in the help section:</p>
+<pre><code class="bash">$ traefik --help
+</code></pre>
+
+<p>Note that all default values will be displayed as well.</p>
+<h3 id="key-value-stores">Key-value stores</h3>
+<p>Træfɪk supports several Key-value stores:</p>
 <ul>
-<li>arguments</li>
-<li>configuration file</li>
-<li>default</li>
+<li><a href="https://consul.io">Consul</a></li>
+<li><a href="https://coreos.com/etcd/">etcd</a></li>
+<li><a href="https://zookeeper.apache.org/">ZooKeeper</a> </li>
+<li><a href="https://github.com/boltdb/bolt">boltdb</a></li>
 </ul>
-<p>It means that arguments overrides configuration file.
-Each argument is described in the help section:</p>
+<p>Please refer to the <a href="../user-guide/kv-config/">User Guide Key-value store configuration</a> section to get documentation on it.</p>
+<h2 id="dynamic-trfk-configuration">Dynamic Træfɪk configuration</h2>
+<p>The dynamic configuration concerns : </p>
+<ul>
+<li><a href="../basics/#frontends">Frontends</a></li>
+<li><a href="../basics/#backends">Backends</a> </li>
+<li><a href="../basics/#servers">Servers</a> </li>
+</ul>
+<p>Træfɪk can hot-reload those rules which could be provided by <a href="../toml/#configuration-backends">multiple configuration backends</a>.</p>
+<p>We only need to enable <code>watch</code> option to make Træfɪk watch configuration backend changes and generate its configuration automatically.
+Routes to services will be created and updated instantly at any changes.</p>
+<p>Please refer to the <a href="../toml/#configuration-backends">configuration backends</a> section to get documentation on it.</p>
+<h1 id="commands">Commands</h1>
+<p>Usage: <code>traefik [command] [--flag=flag_argument]</code></p>
+<p>List of Træfɪk available commands with description :                                                             </p>
+<ul>
+<li><code>version</code> : Print version </li>
+<li><code>storeconfig</code> : Store the static traefik configuration into a Key-value stores. Please refer to the <a href="../user-guide/kv-config/#store-trfk-configuration">Store Træfɪk configuration</a> section to get documentation on it.</li>
+</ul>
+<p>Each command may have related flags. 
+All those related flags will be displayed with :</p>
+<pre><code class="bash">$ traefik [command] --help
+</code></pre>
+
+<p>Note that each command is described at the begining of the help section:</p>
 <pre><code class="bash">$ traefik --help
 </code></pre></div>
         </div>
@@ -389,7 +482,7 @@ Each argument is described in the help section:</p>
         <footer class="col-md-12">
             <hr>
             
-                <center>Copyright (c) 2016 Containous SAS</center>
+                <center>Copyright &copy; 2016 Containous SAS</center>
             
             <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
         </footer>
