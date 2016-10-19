@@ -88,6 +88,12 @@
                     
                         
 <li >
+    <a href="../user-guide/swarm-mode/">Swarm mode cluster</a>
+</li>
+
+                    
+                        
+<li >
     <a href="../user-guide/kubernetes/">Kubernetes</a>
 </li>
 
@@ -940,6 +946,13 @@ domain = &quot;marathon.localhost&quot;
 #
 # groupsAsSubDomains = true
 
+# Enable compatibility with marathon-lb labels
+#
+# Optional
+# Default: false
+#
+# marathonLBCompatibility = true
+
 # Enable Marathon basic authentication
 #
 # Optional
@@ -1092,7 +1105,7 @@ domain = &quot;mesos.localhost&quot;
 <ul>
 <li><code>traefik.frontend.rule.type: PathPrefixStrip</code>: override the default frontend rule type (Default: <code>PathPrefix</code>).</li>
 </ul>
-<p>You can find here an example <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.ingress.yaml">ingress</a> and <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s.rc.yaml">replication controller</a>.</p>
+<p>You can find here an example <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s/cheese-ingress.yaml">ingress</a> and <a href="https://raw.githubusercontent.com/containous/traefik/master/examples/k8s/traefik.yaml">replication controller</a>.</p>
 <h2 id="consul-backend">Consul backend</h2>
 <p>Træfɪk can be configured to use Consul as a backend configuration:</p>
 <pre><code class="toml">################################################################
