@@ -221,14 +221,14 @@
 #
 # logLevel = &quot;ERROR&quot;
 
-# Backends throttle duration: minimum duration between 2 events from providers
+# Backends throttle duration: minimum duration in seconds between 2 events from providers
 # before applying a new configuration. It avoids unnecessary reloads if multiples events
 # are sent in a short amount of time.
 #
 # Optional
-# Default: &quot;2s&quot;
+# Default: &quot;2&quot;
 #
-# ProvidersThrottleDuration = &quot;5s&quot;
+# ProvidersThrottleDuration = &quot;5&quot;
 
 # If non-zero, controls the maximum idle (keep-alive) to keep per-host.  If zero, DefaultMaxIdleConnsPerHost is used.
 # If you encounter 'too many open files' errors, you can either change this value, or change `ulimit` value.
