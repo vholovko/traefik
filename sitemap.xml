@@ -4,7 +4,7 @@
     
     <url>
      <loc>https://docs.traefik.io/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -12,7 +12,7 @@
     
     <url>
      <loc>https://docs.traefik.io/basics/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -20,7 +20,7 @@
     
     <url>
      <loc>https://docs.traefik.io/toml/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -29,37 +29,37 @@
         
     <url>
      <loc>https://docs.traefik.io/user-guide/examples/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>https://docs.traefik.io/user-guide/swarm/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>https://docs.traefik.io/user-guide/swarm-mode/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>https://docs.traefik.io/user-guide/kubernetes/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>https://docs.traefik.io/user-guide/kv-config/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>https://docs.traefik.io/user-guide/cluster/</loc>
-     <lastmod>2016-11-10</lastmod>
+     <lastmod>2016-11-18</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
